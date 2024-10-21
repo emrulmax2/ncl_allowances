@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ThemeController;
@@ -19,6 +21,21 @@ use App\Http\Controllers\LayoutController;
 Route::get('theme-switcher/{activeTheme}', [ThemeController::class, 'switch'])->name('theme-switcher');
 Route::get('layout-switcher/{activeLayout}', [LayoutController::class, 'switch'])->name('layout-switcher');
 
+
+Route::controller(AuthController::class)->middleware('loggedin')->group(function() {
+    Route::get('login', 'loginView')->name('login.index');
+    Route::post('login', 'login')->name('login.check');
+});
+Route::middleware('auth')->group(function() {
+    
+    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::controller(DashboardController::class)->group(function() {
+        Route::get('/', 'index')->name('dashboard'); 
+    });
+});
+
+/** This is for education purpose */
 Route::controller(PageController::class)->group(function () {
     Route::get('/', 'dashboardOverview1')->name('dashboard-overview-1');
     Route::get('dashboard-overview-2-page', 'dashboardOverview2')->name('dashboard-overview-2');
@@ -94,3 +111,4 @@ Route::controller(PageController::class)->group(function () {
     Route::get('slider-page', 'slider')->name('slider');
     Route::get('image-zoom-page', 'imageZoom')->name('image-zoom');
 });
+/* end of education purpose*/

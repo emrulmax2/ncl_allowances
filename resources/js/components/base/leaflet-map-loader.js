@@ -1,9 +1,7 @@
 (async function () {
     "use strict";
-
-    const locations = await axios.get(
-        "https://dummy-wrvf.vercel.app/location.json"
-    );
+    const jsonUrl = "/json/location.json";
+    const locations = await axios.get(jsonUrl);
 
     $(".leaflet").each(async function () {
         const map = L.map(this, {

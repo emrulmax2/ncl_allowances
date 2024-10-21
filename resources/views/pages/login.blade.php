@@ -1,7 +1,7 @@
 @extends('../themes/base')
 
 @section('head')
-    <title>Login - Midone - Tailwind Admin Dashboard Template</title>
+    <title>Login - NCL DEPOT OIL MANAGEMENT</title>
 @endsection
 
 @section('content')
@@ -21,7 +21,7 @@
                         <img
                             class="w-6"
                             src="{{ Vite::asset('resources/images/logo.svg') }}"
-                            alt="Midone - Tailwind Admin Dashboard Template"
+                            alt="NCL DEPOT"
                         />
                         <span class="ml-3 text-lg text-white"> Midone </span>
                     </a>
@@ -29,14 +29,14 @@
                         <img
                             class="-intro-x -mt-16 w-1/2"
                             src="{{ Vite::asset('resources/images/illustration.svg') }}"
-                            alt="Midone - Tailwind Admin Dashboard Template"
+                            alt="NCL DEPOT"
                         />
                         <div class="-intro-x mt-10 text-4xl font-medium leading-tight text-white">
                             A few more clicks to <br />
                             sign in to your account.
                         </div>
                         <div class="-intro-x mt-5 text-lg text-white text-opacity-70 dark:text-slate-400">
-                            Manage all your e-commerce accounts in one place
+                            Manage all your accounts in one place
                         </div>
                     </div>
                 </div>
@@ -50,19 +50,23 @@
                         </h2>
                         <div class="intro-x mt-2 text-center text-slate-400 xl:hidden">
                             A few more clicks to sign in to your account. Manage all your
-                            e-commerce accounts in one place
+                            accounts in one place
                         </div>
                         <div class="intro-x mt-8">
-                            <x-base.form-input
-                                class="intro-x block min-w-full px-4 py-3 xl:min-w-[350px]"
-                                type="text"
-                                placeholder="Email"
-                            />
-                            <x-base.form-input
-                                class="intro-x mt-4 block min-w-full px-4 py-3 xl:min-w-[350px]"
-                                type="password"
-                                placeholder="Password"
-                            />
+                            <form id="login-form">
+                                <x-base.form-input
+                                id="email" class="intro-x block login__input min-w-full px-4 py-3 xl:min-w-[350px]"
+                                    type="text"
+                                    placeholder="Email"
+                                />
+                                <div id="error-email" class="login__input-error text-danger mt-2 dark:text-orange-400 "></div>
+                                <x-base.form-input
+                                id="password" class="intro-x mt-4 login__input block min-w-full px-4 py-3 xl:min-w-[350px]"
+                                    type="password"
+                                    placeholder="Password"
+                                />
+                                <div id="error-password" class="login__input-error text-danger mt-2 dark:text-orange-400"></div>
+                            </form>
                         </div>
                         <div class="intro-x mt-4 flex text-xs text-slate-600 dark:text-slate-500 sm:text-sm">
                             <div class="mr-auto flex items-center">
@@ -82,10 +86,13 @@
                         </div>
                         <div class="intro-x mt-5 text-center xl:mt-8 xl:text-left">
                             <x-base.button
-                                class="w-full px-4 py-3 align-top xl:mr-3 xl:w-32"
+                            id="btn-login" class="w-full px-4 py-3 align-top xl:mr-3 xl:w-32"
                                 variant="primary"
                             >
-                                Login
+                                Login <x-base.loading-icon
+                                class="h-4 w-4 hidden ml-2 login__loading"
+                                icon="oval" color="#fff"
+                            />
                             </x-base.button>
                             <x-base.button
                                 class="mt-3 w-full px-4 py-3 align-top xl:mt-0 xl:w-32"
@@ -117,3 +124,61 @@
         </div>
     </div>
 @endsection
+
+@pushOnce('vendors')
+    @vite('resources/js/utils/helper.js')
+    @vite('resources/js/vendors/axios.js')
+@endPushOnce
+
+@pushOnce('scripts')
+    <script type="module">
+        (function () {
+            if($('#success-notification-toggle').length>0) {
+                $("#success-notification-toggle").trigger('click')
+            }
+            async function login() {
+                // Reset state
+                $('#login-form').find('.login__input').removeClass('border-danger')
+                $('#login-form').find('.login__input-error').html('')
+
+                // Post form
+                let email = $('#email').val()
+                let password = $('#password').val()
+                $('#btn-login .login__loading').removeClass('hidden');
+                // Loading state
+                //$('#btn-login').html('<i data-loading-icon="oval" data-color="white" class="w-5 h-5 mx-auto"></i>')
+                //tailwind.svgLoader()
+                await helper.delay(1500)
+
+                axios.post(`login`, {
+                    email: email,
+                    password: password
+                }).then(res => {
+                    location.href = '/'
+                }).catch(err => {
+                    //$('#btn-login').html('Login')
+                    $('#btn-login .login__loading').addClass('hidden');
+                    if (err.response.data.message != 'Wrong email or password.') {
+                        for (const [key, val] of Object.entries(err.response.data.errors)) {
+                            $(`#${key}`).addClass('border-danger')
+                            $(`#error-${key}`).html(val)
+                        }
+                    } else {
+                        $(`#password`).addClass('border-danger')
+                        $(`#error-password`).html(err.response.data.message)
+                    }
+                })
+            }
+
+            $('#login-form').on('keyup', function(e) {
+                if (e.keyCode === 13) {
+                    login()
+                }
+            })
+
+            $('#btn-login').on('click', function() {
+                login()
+            })
+        })()
+    </script>
+@endPushOnce

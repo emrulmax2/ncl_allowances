@@ -159,6 +159,7 @@ export default defineConfig({
     resolve: {
         alias: {
             "tailwind-config": path.resolve(__dirname, "./tailwind.config.js"),
+            'ziggy-js': path.resolve('vendor/tightenco/ziggy/dist/vue.es.js'),
         },
     },
 });
